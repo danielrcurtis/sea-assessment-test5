@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Tiny authenticated curl wrapper. Logs every request/response for the audit trail.
+# Usage: scripts/api <METHOD> <PATH> [curl-args...]
+#        scripts/api GET /api/v1/health
+set -euo pipefail
+source /home/dcurtismit/.sea-test/env
+
+method="${1:?method}"; shift
+path="${1:?path}"; shift
+ts=$(date -u +%Y%m%dT%H%M%SZ)
+mkdir -p log
+hdrs="log/${ts}.${method}.$(echo "$path" | tr '/?&=' '____').h"
+body="log/${ts}.${method}.$(echo "$path" | tr '/?&=' '____').b"
+
+curl -sS -X "$method" \
+  -H "Authorization: Bearer ${SEA_KEY}" \
+  -D "$hdrs" -o "$body" \
+  "$@" \
+  "${SEA_BASE}${path}"
+
+# Pretty status/ratelimit/clock summary to stderr
+{
+  echo "--- ${method} ${path} ---"
+  awk 'NR==1 || /^(ratelimit|retry-after|x-clock|x-time|x-remaining|x-ratelimit|content-type|content-length|etag|last-modified|location|x-)/I' "$hdrs"
+  echo "--- body (${body}) ---"
+} >&2
+# Print body to stdout (so it can be piped)
+cat "$body"
+echo >&2 "--- end ---"
