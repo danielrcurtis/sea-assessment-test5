@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: keys
+      POSTGRES_PASSWORD: keys
+      POSTGRES_DB: keys
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keys"]
+      interval: 2s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 10
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgres://keys:keys@postgres:5432/keys
+      REDIS_URL: redis://redis:6379/0
+      MASTER_SECRET: ${MASTER_SECRET:-0000000000000000000000000000000000000000000000000000000000000000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+volumes:
+  pgdata: {}
