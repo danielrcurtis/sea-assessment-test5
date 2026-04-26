@@ -61,8 +61,11 @@ curl 'http://localhost:8000/keys?owner_email=a@b.test'
 - **Tests.** Wrote the spec in `tests/test_ratelimit.py` (boundary
   case: 3 OK then 429, advance virtual clock past hour, OK again)
   and `tests/test_crypto.py` (round-trip, AAD-mismatch rejection,
-  nonce uniqueness over 1000 encrypts). Didn't run them — `pytest`
-  + `fakeredis` would be the obvious wiring.
+  nonce uniqueness over 1000 encrypts). The crypto tests have been
+  smoke-verified inline without `pytest` (round-trip ✓, AAD binding
+  rejects swapped row ✓, 1000 distinct nonces ✓). The rate-limit
+  tests need `fakeredis` + `pytest-asyncio` installed — `pip install
+  -r requirements.txt` then `pytest`.
 
 ## Architecture call-outs the reviewer should look for
 
