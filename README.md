@@ -25,6 +25,14 @@ the API even look like?" exploration, fewer than 30 minutes remained
 to attempt all four — I prioritised L4 + writeup over more L1/L2
 hash sweeps, which is why those slots are unsubmitted.
 
+Final submissions accepted (`correct: true`):
+
+- `repo` → this repo URL.
+- `transcript` → URL to `log/` in this repo (per-call request/response logs).
+- `analysis` (Layer 4) → multiple observations, including the
+  `partner` over-representation finding and the
+  ETag-equals-canonical-sha256 finding.
+
 ---
 
 ## What the API looks like
